@@ -16,3 +16,12 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+
+
+Route::middleware(['auth', 'role:admin'])->group(function () {
+    Route::get('/admin/dashboard', [AdminController::class, 'index']);
+});
+
+Route::middleware(['auth', 'role:kasir'])->group(function () {
+    Route::get('/kasir/dashboard', [KasirController::class, 'index']);
+});
