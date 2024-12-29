@@ -68,7 +68,9 @@ class Kernel extends HttpKernel
         'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
         'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
         'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
-        'CheckFilamentAccess' => \App\Http\Middleware\CheckFilamentAccess::class
+        'CheckFilamentAccess' => \App\Http\Middleware\CheckFilamentAccess::class,
+        'check.kasir.promo' => \App\Http\Middleware\CheckKasirPromoAccess::class,
+        'check.order.account' => \App\Http\Middleware\CheckOrderAccountRequirement::class
 
     ];
 }
