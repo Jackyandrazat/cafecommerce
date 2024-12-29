@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Resources\OrderResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\OrderResource\RelationManagers;
+use Filament\Tables\Actions\Action;
 
 class OrderResource extends Resource
 {
@@ -78,6 +79,11 @@ class OrderResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Action::make('cetak_laporan')
+                ->label('Cetak Laporan Pesanan')
+                ->icon('heroicon-o-printer')
+                ->url(fn($record) => route('reports.orders', $record->id))
+                ->openUrlInNewTab(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
