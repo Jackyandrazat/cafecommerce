@@ -4,6 +4,7 @@ import { createInertiaApp } from '@inertiajs/vue3';
 import PrimeVue from 'primevue/config';
 import Aura from '@primevue/themes/aura';
 import '../css/app.css';
+import 'primeicons/primeicons.css';
 
 createInertiaApp({
     resolve: (name) => import(`./Pages/${name}.vue`),
