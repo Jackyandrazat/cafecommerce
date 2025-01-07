@@ -11,4 +11,9 @@ export default defineConfig({
         }),
         vue(),
     ],
+    resolve: {
+        alias: {
+            'ziggy-js': path.resolve('vendor/tightenco/ziggy'),
+        },
+    },
 });

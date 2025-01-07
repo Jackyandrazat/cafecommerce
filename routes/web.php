@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\ProductController;
 use App\Http\Controllers\Frontend\CartController;
 use App\Http\Controllers\Frontend\HomeController;
 use App\Http\Controllers\Frontend\CheckoutController;
@@ -22,7 +23,8 @@ use App\Http\Controllers\Frontend\CheckoutController;
 // });
 
 Route::get('/', [HomeController::class, 'index'])->name('landing.page');
-Route::get('/product/{id}', [HomeController::class, 'show'])->name('product.show');
+Route::get('/products', [ProductController::class, 'index'])->name('products.index');
+Route::get('/products/{id}', [ProductController::class, 'show'])->name('products.show');
 
 Route::middleware('auth')->group(function () {
     Route::get('/cart', [CartController::class, 'index'])->name('cart.index');

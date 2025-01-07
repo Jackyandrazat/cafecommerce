@@ -1,0 +1,94 @@
+<template>
+    <div class="container mx-auto p-4">
+        <h1 class="text-2xl font-bold mb-4">Daftar Produk</h1>
+
+        <!-- Search & Filter -->
+        <div class="flex gap-4 mb-4">
+            <input
+                v-model="filters.search"
+                @input="filter"
+                placeholder="Cari produk..."
+                class="border p-2 rounded-md w-full"
+            />
+            <select
+                v-model="filters.category"
+                @change="filter"
+                class="border p-2 rounded-md"
+            >
+                <option value="">Semua Kategori</option>
+                <option value="1">Makanan</option>
+                <option value="2">Minuman</option>
+            </select>
+        </div>
+
+        <!-- Daftar Produk -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div
+                v-for="product in products.data"
+                :key="product.id"
+                class="bg-white p-4 shadow-md rounded-md"
+            >
+                <img
+                    :src="product.image"
+                    alt="Product Image"
+                    class="w-full h-32 object-cover rounded-md"
+                />
+                <h2 class="text-lg font-bold mt-2">{{ product.name }}</h2>
+                <p class="text-sm text-gray-500">{{ product.price }} IDR</p>
+                <button
+                    @click="goToDetail(product.id)"
+                    class="mt-2 w-full bg-green-500 text-white py-1 rounded-md"
+                >
+                    Lihat Detail
+                </button>
+
+                <button
+                    class="mt-2 w-full bg-blue-500 text-white py-1 rounded-md"
+                >
+                    Tambah ke Keranjang
+                </button>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="mt-4 flex justify-center">
+            <pagination :links="products.links" />
+        </div>
+    </div>
+</template>
+
+<script setup>
+import { reactive, watch } from "vue";
+import { router } from "@inertiajs/vue3";
+import Pagination from "@/Components/Pagination.vue";
+import AppLayout from "@/Layouts/AppLayout.vue";
+
+// Ambil props langsung dari defineProps
+const props = defineProps({
+    products: Object,
+    filters: Object,
+    layout: AppLayout,
+});
+
+// State untuk Filter
+const filters = reactive({
+    search: props.filters.search || "",
+    category: props.filters.category || "",
+});
+
+// Fungsi untuk Filter Produk
+const filter = () => {
+    router.get("/products", filters, { preserveState: true, replace: true });
+};
+
+const goToDetail = (id) => {
+    router.visit(`/products/${id}`);
+};
+</script>
+
+<style scoped>
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+</style>

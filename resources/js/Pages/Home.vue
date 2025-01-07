@@ -1,20 +1,5 @@
 <template>
     <div :class="['landing-page', { dark: isDarkMode }]">
-        <!-- Navbar -->
-        <div class="navbar flex justify-between items-center px-6 py-4 shadow-md">
-            <h2 class="logo">☕ CoffeeBuy</h2>
-            <div class="menu hidden md:flex gap-6">
-                <a href="#" class="text">Catalogue</a>
-                <a href="#" class="text">Delivery</a>
-                <a href="#" class="text">Gift cards</a>
-                <a href="#" class="text">About us</a>
-            </div>
-            <div class="actions flex items-center gap-4">
-                <Button label="Sign in" class="p-button-rounded p-button-primary" />
-                <i class="pi pi-shopping-cart text-2xl"></i>
-                <ToggleSwitch v-model="isDarkMode" class="p-button-rounded" />
-            </div>
-        </div>
 
         <!-- Hero Section -->
         <div class="hero flex flex-col md:flex-row items-center justify-center gap-8 p-8">
@@ -44,7 +29,6 @@
 <script setup>
 import { ref, watch } from 'vue';
 import Button from 'primevue/button';
-import ToggleSwitch from 'primevue/toggleswitch';
 import ProductInfoSection from './ProductInfoSection.vue';
 import BestSellerProducts from './BestSellerProducts .vue';
 
