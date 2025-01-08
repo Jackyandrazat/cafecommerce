@@ -24,7 +24,10 @@
                 <button class="bg-green-500 text-white px-4 py-2 rounded">
                     Sign in
                 </button>
-                <button class="text-gray-600 dark:text-gray-300">🛒</button>
+                <!-- <router-link :to="route('cart.index')" class="text-gray-700 hover:text-blue-500">Keranjang</router-link> -->
+                <a :href="route('cart.index')" class="hover:text-blue-500"
+                        >Keranjang</a
+                    >
                 <ToggleSwitch v-model="isDarkMode" class="p-button-rounded" />
             </div>
         </div>
