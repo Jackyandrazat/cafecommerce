@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CartItemController;
@@ -27,12 +28,6 @@ Route::get('/', [HomeController::class, 'index'])->name('landing.page');
 Route::get('/products', [ProductController::class, 'index'])->name('products.index');
 Route::get('/products/{id}', [ProductController::class, 'show'])->name('products.show');
 
-Route::middleware('auth')->group(function () {
-    Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
-    Route::post('/checkout/process', [CheckoutController::class, 'process'])->name('checkout.process');
-    Route::post('/checkout/apply-promo', [CheckoutController::class, 'applyPromo'])->name('checkout.applyPromo');
-
-});
 Route::middleware(['auth', 'role:admin|kasir'])->group(function () {
     // Route::get('/reports/orders', [ReportController::class, 'generateOrderReport'])->name('reports.orders');
     Route::get('/reports/orders/{id}', [ReportController::class, 'generateOrderReport'])
@@ -41,10 +36,15 @@ Route::middleware(['auth', 'role:admin|kasir'])->group(function () {
 });
 
 
+Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [AuthController::class, 'login']);
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+Route::middleware(['auth', 'role:kasir|pelanggan'])->group(function () {
     Route::get('/cart', [CartItemController::class, 'index'])->name('cart.index');
     Route::post('/cart', [CartItemController::class, 'store'])->name('cart.store');
     Route::get('/cart/{cartItem}', [CartItemController::class, 'show'])->name('cart.show');
     Route::put('/cart/{cartItem}', [CartItemController::class, 'update'])->name('cart.update');
     Route::delete('/cart/{cartItem}', [CartItemController::class, 'destroy'])->name('cart.destroy');
     Route::post('/cart/add', [CartItemController::class, 'store'])->name('cart.add');
-
+});
