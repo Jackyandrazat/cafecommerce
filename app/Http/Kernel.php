@@ -70,7 +70,8 @@ class Kernel extends HttpKernel
         'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
         'CheckFilamentAccess' => \App\Http\Middleware\CheckFilamentAccess::class,
         'check.kasir.promo' => \App\Http\Middleware\CheckKasirPromoAccess::class,
-        'check.order.account' => \App\Http\Middleware\CheckOrderAccountRequirement::class
+        'check.order.account' => \App\Http\Middleware\CheckOrderAccountRequirement::class,
+        'cart.access' => \App\Http\Middleware\CheckCartAccess::class,
 
     ];
 }

@@ -121,31 +121,24 @@ const Ziggy = {
             methods: ["GET", "HEAD"],
             parameters: ["id"],
         },
-        "cart.index": { uri: "cart", methods: ["GET", "HEAD"] },
-        "cart.add": { uri: "cart/add", methods: ["POST"] },
-        "cart.update": {
-            uri: "cart/{cartItem}",
-            methods: ["PUT"],
-            parameters: ["cartItem"],
-            bindings: { cartItem: "id" },
-        },
-        "cart.remove": { uri: "cart/remove", methods: ["DELETE"] },
-        "checkout.index": { uri: "checkout", methods: ["GET", "HEAD"] },
-        "checkout.process": { uri: "checkout/process", methods: ["POST"] },
-        "checkout.applyPromo": {
-            uri: "checkout/apply-promo",
-            methods: ["POST"],
-        },
         "reports.orders": {
             uri: "reports/orders/{id}",
             methods: ["GET", "HEAD"],
             parameters: ["id"],
         },
         "reports.monthly": { uri: "reports/monthly", methods: ["GET", "HEAD"] },
+        login: { uri: "login", methods: ["GET", "HEAD"] },
+        logout: { uri: "logout", methods: ["POST"] },
+        "cart.index": { uri: "cart", methods: ["GET", "HEAD"] },
         "cart.store": { uri: "cart", methods: ["POST"] },
         "cart.show": {
             uri: "cart/{cartItem}",
             methods: ["GET", "HEAD"],
+            parameters: ["cartItem"],
+        },
+        "cart.update": {
+            uri: "cart/{cartItem}",
+            methods: ["PATCH"],
             parameters: ["cartItem"],
             bindings: { cartItem: "id" },
         },
@@ -155,6 +148,13 @@ const Ziggy = {
             parameters: ["cartItem"],
             bindings: { cartItem: "id" },
         },
+        "cart.add": { uri: "cart/add", methods: ["POST"] },
+        "checkout.index": { uri: "checkout", methods: ["GET", "HEAD"] },
+        "checkout.apply-promo": {
+            uri: "checkout/apply-promo",
+            methods: ["POST"],
+        },
+        "checkout.process": { uri: "checkout/process", methods: ["POST"] },
     },
 };
 if (typeof window !== "undefined" && typeof window.Ziggy !== "undefined") {

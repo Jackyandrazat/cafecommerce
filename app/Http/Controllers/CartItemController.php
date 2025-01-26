@@ -5,42 +5,45 @@ namespace App\Http\Controllers;
 use Inertia\Inertia;
 use App\Models\Product;
 use App\Models\CartItem;
-use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\StoreCartItemRequest;
 use App\Http\Requests\UpdateCartItemRequest;
+use Illuminate\Support\Facades\Auth;
 
 class CartItemController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Display a listing of the resource (Cart Items).
      */
     public function index()
     {
         $cartItems = CartItem::with('product')
-            ->where('user_id', Auth::id())
+            ->where('user_id', auth()->id())
             ->orWhere('session_id', session()->getId())
             ->get();
 
+        $total = $cartItems->sum(fn ($item) => $item->quantity * $item->price);
+
         return Inertia::render('Cart/index', [
             'cartItems' => $cartItems,
+            'total' => $total,
         ]);
     }
 
     /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
+     * Store a newly created cart item in storage.
      */
     public function store(StoreCartItemRequest $request)
     {
+        if (!auth()->check()) {
+            return redirect()->route('login')->with('error', 'Anda harus login untuk menambahkan produk ke keranjang.');
+        }
+
         $product = Product::findOrFail($request->product_id);
 
+        if ($product->stock < $request->quantity) {
+            return redirect()->back()->with('error', 'Stok tidak mencukupi.');
+        }
+        
         $cartItem = CartItem::updateOrCreate(
             [
                 'user_id' => Auth::id(),
@@ -53,29 +56,13 @@ class CartItemController extends Controller
             ]
         );
 
-        return redirect()->route('cart.index')->with('success', 'Produk berhasil ditambahkan ke keranjang.');
+        return redirect()->back()->with('success', 'Produk berhasil ditambahkan ke keranjang.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(CartItem $cartItem)
-    {
-        return Inertia::render('Cart/Show', [
-            'cartItem' => $cartItem->load('product'),
-        ]);
-    }
+
 
     /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(CartItem $cartItem)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
+     * Update the specified cart item in storage.
      */
     public function update(UpdateCartItemRequest $request, CartItem $cartItem)
     {
@@ -87,7 +74,7 @@ class CartItemController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Remove the specified cart item from storage.
      */
     public function destroy(CartItem $cartItem)
     {

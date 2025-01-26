@@ -9,6 +9,7 @@ import { ZiggyVue } from "ziggy-js";
 import { route } from "ziggy-js";
 import { Ziggy } from "/resources/js/ziggy";
 import AppLayout from '@/Layouts/AppLayout.vue';
+import ToastService from 'primevue/toastservice';
 
 createInertiaApp({
     resolve: async (name) => {
@@ -37,6 +38,7 @@ createInertiaApp({
                     preset: Aura,
                 },
             })
+            .use(ToastService)
             .mount(el);
     },
 });

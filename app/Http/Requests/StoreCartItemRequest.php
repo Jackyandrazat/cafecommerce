@@ -6,24 +6,26 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class StoreCartItemRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
-    public function authorize(): bool
+    public function authorize()
     {
-        return true;
+        return true; // Ganti jika ingin menambahkan otorisasi khusus
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
-    public function rules(): array
+    public function rules()
     {
         return [
             'product_id' => 'required|exists:products,id',
-            'quantity' => 'required|integer|min:1',
+            'quantity' => 'nullable|integer|min:1',
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            'product_id.required' => 'Produk harus dipilih.',
+            'product_id.exists' => 'Produk tidak valid.',
+            'quantity.integer' => 'Jumlah harus berupa angka.',
+            'quantity.min' => 'Jumlah minimal adalah 1.',
         ];
     }
 }

@@ -5,9 +5,9 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CartItemController;
+use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\Frontend\CartController;
 use App\Http\Controllers\Frontend\HomeController;
-use App\Http\Controllers\Frontend\CheckoutController;
 
 /*
 |--------------------------------------------------------------------------
@@ -44,7 +44,14 @@ Route::middleware(['auth', 'role:kasir|pelanggan'])->group(function () {
     Route::get('/cart', [CartItemController::class, 'index'])->name('cart.index');
     Route::post('/cart', [CartItemController::class, 'store'])->name('cart.store');
     Route::get('/cart/{cartItem}', [CartItemController::class, 'show'])->name('cart.show');
-    Route::put('/cart/{cartItem}', [CartItemController::class, 'update'])->name('cart.update');
+    Route::patch ('/cart/{cartItem}', [CartItemController::class, 'update'])->name('cart.update');
     Route::delete('/cart/{cartItem}', [CartItemController::class, 'destroy'])->name('cart.destroy');
     Route::post('/cart/add', [CartItemController::class, 'store'])->name('cart.add');
 });
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
+    Route::post('/checkout/apply-promo', [CheckoutController::class, 'applyPromo'])->name('checkout.apply-promo');
+    Route::post('/checkout/process', [CheckoutController::class, 'process'])->name('checkout.process');
+});
+

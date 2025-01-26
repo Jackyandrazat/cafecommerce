@@ -34,7 +34,11 @@
                     class="w-full h-32 object-cover rounded-md"
                 />
                 <h2 class="text-lg font-bold mt-2">{{ product.name }}</h2>
-                <p class="text-sm text-gray-500">{{ product.price }} IDR</p>
+                <p class="text-sm text-gray-500">
+                    {{ formatCurrency(product.price) }}
+                </p>
+
+                <!-- Tombol Lihat Detail -->
                 <button
                     @click="goToDetail(product.id)"
                     class="mt-2 w-full bg-green-500 text-white py-1 rounded-md"
@@ -42,7 +46,9 @@
                     Lihat Detail
                 </button>
 
+                <!-- Tombol Tambah ke Keranjang -->
                 <button
+                    @click="addToCart(product.id)"
                     class="mt-2 w-full bg-blue-500 text-white py-1 rounded-md"
                 >
                     Tambah ke Keranjang
@@ -62,6 +68,10 @@ import { reactive, watch } from "vue";
 import { router } from "@inertiajs/vue3";
 import Pagination from "@/Components/Pagination.vue";
 import AppLayout from "@/Layouts/AppLayout.vue";
+import { useToast } from "primevue/usetoast";
+
+
+const toast = useToast();
 
 // Ambil props langsung dari defineProps
 const props = defineProps({
@@ -81,8 +91,46 @@ const filter = () => {
     router.get("/products", filters, { preserveState: true, replace: true });
 };
 
+// Fungsi untuk Format Currency
+const formatCurrency = (value) => {
+    return new Intl.NumberFormat("id-ID", {
+        style: "currency",
+        currency: "IDR",
+    }).format(value);
+};
+
+// Navigasi ke Detail Produk
 const goToDetail = (id) => {
     router.visit(`/products/${id}`);
+};
+
+// Tambah Produk ke Keranjang
+const addToCart = (productId) => {
+    router.post(
+        "/cart",
+        {
+            product_id: productId,
+            quantity: 1, // Default jumlah
+        },
+        {
+            onSuccess: () => {
+                toast.add({
+                    severity: "success",
+                    summary: "Berhasil",
+                    detail: "Produk berhasil ditambahkan ke keranjang.",
+                    life: 3000, // Durasi notifikasi dalam milidetik
+                });
+            },
+            onError: () => {
+                toast.add({
+                    severity: "error",
+                    summary: "Gagal",
+                    detail: "Terjadi kesalahan saat menambah produk ke keranjang.",
+                    life: 3000,
+                });
+            },
+        }
+    );
 };
 </script>
 

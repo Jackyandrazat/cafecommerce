@@ -6,23 +6,24 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateCartItemRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
-    public function authorize(): bool
+    public function authorize()
     {
-        return false;
+        return true; // Ganti jika ingin menambahkan otorisasi khusus
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
-    public function rules(): array
+    public function rules()
     {
         return [
             'quantity' => 'required|integer|min:1',
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            'quantity.required' => 'Jumlah harus diisi.',
+            'quantity.integer' => 'Jumlah harus berupa angka.',
+            'quantity.min' => 'Jumlah minimal adalah 1.',
         ];
     }
 }
