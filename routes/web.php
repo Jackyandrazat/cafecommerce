@@ -24,7 +24,7 @@ use App\Http\Controllers\Frontend\HomeController;
 //     return view('welcome');
 // });
 
-Route::get('/', [HomeController::class, 'index'])->name('landing.page');
+Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/products', [ProductController::class, 'index'])->name('products.index');
 Route::get('/products/{id}', [ProductController::class, 'show'])->name('products.show');
 

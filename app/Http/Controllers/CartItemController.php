@@ -43,7 +43,7 @@ class CartItemController extends Controller
         if ($product->stock < $request->quantity) {
             return redirect()->back()->with('error', 'Stok tidak mencukupi.');
         }
-        
+
         $cartItem = CartItem::updateOrCreate(
             [
                 'user_id' => Auth::id(),
@@ -56,7 +56,7 @@ class CartItemController extends Controller
             ]
         );
 
-        return redirect()->back()->with('success', 'Produk berhasil ditambahkan ke keranjang.');
+        return back()->with('success', 'Produk berhasil ditambahkan ke keranjang.');
     }
 
 

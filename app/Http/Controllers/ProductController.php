@@ -24,7 +24,7 @@ class ProductController extends Controller
             ->paginate(10)
             ->withQueryString(); // Menyimpan parameter query untuk pagination
 
-        return Inertia::render('Products/productIndex', [
+        return Inertia::render('Products/index', [
             'products' => $products,
             'filters' => $request->only(['search', 'category'])
         ]);

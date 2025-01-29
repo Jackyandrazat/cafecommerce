@@ -16,7 +16,7 @@
                 </thead>
                 <tbody>
                     <tr v-for="item in cartItems" :key="item.id">
-                        <td>{{ item.product.name }}</td>
+                        <td>{{ item.product.name }} - Stok: {{ item.product.stock }}</td>
                         <td>
                             <input
                                 v-model.number="item.quantity"
@@ -27,9 +27,7 @@
                             />
                         </td>
                         <td>{{ formatCurrency(item.price) }}</td>
-                        <td>
-                            {{ formatCurrency(item.price * item.quantity) }}
-                        </td>
+                        <td>{{ formatCurrency(item.price * item.quantity) }}</td>
                         <td>
                             <button
                                 @click="removeItem(item.id)"
@@ -67,16 +65,20 @@
 </template>
 
 <script setup>
-import { reactive } from "vue";
-import { router } from "@inertiajs/vue3";
 import { defineProps } from "vue";
+import { router } from "@inertiajs/vue3";
 import { route } from "ziggy-js";
+import { useToast } from 'primevue/usetoast'; // 1) import PrimeVue Toast
 
-defineProps({
+const props = defineProps({
     cartItems: Array,
     total: Number,
 });
 
+// Inisialisasi Toast
+const toast = useToast();
+
+// Fungsi Format Rupiah
 const formatCurrency = (value) => {
     return new Intl.NumberFormat("id-ID", {
         style: "currency",
@@ -84,20 +86,35 @@ const formatCurrency = (value) => {
     }).format(value);
 };
 
-// Fungsi untuk Update Jumlah
+// Fungsi Update Jumlah Item
 const updateQuantity = (item) => {
     router.patch(route("cart.update", item.id), {
         quantity: item.quantity,
     });
 };
 
-// Fungsi untuk Hapus Produk
+// Fungsi Hapus Item
 const removeItem = (id) => {
     router.delete(route("cart.destroy", id));
 };
 
-// Navigasi ke Halaman Checkout
+// Fungsi Navigasi ke Halaman Checkout dengan Validasi Stok
 const goToCheckout = () => {
-    router.get(route('checkout.index')); // Mengarahkan ke halaman Checkout
+    // 2) Loop cartItems, cek stok
+    for (const item of props.cartItems) {
+        if (item.quantity > item.product.stock) {
+            // 3) Tampilkan Toast Error & batalkan navigasi
+            toast.add({
+                severity: 'error',
+                summary: 'Stok Tidak Cukup',
+                detail: `Jumlah produk "${item.product.name}" melebihi stok tersedia.`,
+                life: 3000,
+            });
+            return; // Stop proses, tidak jadi ke Checkout
+        }
+    }
+
+    // 4) Jika semua valid, baru menuju halaman Checkout
+    router.get(route('checkout.index'));
 };
 </script>

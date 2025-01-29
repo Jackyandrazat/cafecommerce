@@ -7,23 +7,12 @@
             <!-- Informasi Pengguna -->
             <div class="mb-4">
                 <label for="name" class="block font-bold">Nama:</label>
-                <input
-                    v-model="form.name"
-                    id="name"
-                    type="text"
-                    class="border p-2 rounded-md w-full"
-                    required
-                />
+                <input v-model="form.name" id="name" type="text" class="border p-2 rounded-md w-full" required />
             </div>
             <div class="mb-4">
                 <label for="address" class="block font-bold">Alamat:</label>
-                <textarea
-                    v-model="form.address"
-                    id="address"
-                    class="border p-2 rounded-md w-full"
-                    rows="3"
-                    required
-                ></textarea>
+                <textarea v-model="form.address" id="address" class="border p-2 rounded-md w-full" rows="3"
+                    required></textarea>
             </div>
 
             <!-- Metode Pembayaran -->
@@ -31,30 +20,15 @@
                 <label class="block font-bold">Metode Pembayaran:</label>
                 <div class="flex gap-4">
                     <label class="flex items-center gap-2">
-                        <input
-                            v-model="form.payment_method"
-                            type="radio"
-                            value="COD"
-                            required
-                        />
+                        <input v-model="form.payment_method" type="radio" value="cod" required />
                         COD (Bayar di Tempat)
                     </label>
                     <label class="flex items-center gap-2">
-                        <input
-                            v-model="form.payment_method"
-                            type="radio"
-                            value="QRIS"
-                            required
-                        />
+                        <input v-model="form.payment_method" type="radio" value="qris" required />
                         QRIS
                     </label>
                     <label class="flex items-center gap-2">
-                        <input
-                            v-model="form.payment_method"
-                            type="radio"
-                            value="MIDTRANS"
-                            required
-                        />
+                        <input v-model="form.payment_method" type="radio" value="midtrans" required />
                         Midtrans
                     </label>
                 </div>
@@ -88,10 +62,7 @@
 
             <!-- Tombol Konfirmasi -->
             <div class="mt-6">
-                <button
-                    type="submit"
-                    class="bg-green-500 text-white py-2 px-4 rounded-md w-full"
-                >
+                <button type="submit" class="bg-green-500 text-white py-2 px-4 rounded-md w-full">
                     Konfirmasi Pesanan
                 </button>
             </div>
@@ -102,6 +73,7 @@
 <script setup>
 import { reactive } from "vue";
 import { router } from "@inertiajs/vue3";
+import { useToast } from "primevue/usetoast";
 import { defineProps } from "vue";
 import { route } from "ziggy-js";
 
@@ -130,16 +102,44 @@ const formatCurrency = (value) => {
 };
 
 // Fungsi untuk memproses checkout
+const toast = useToast(); // Inisialisasi toast
+
 const processCheckout = () => {
     router.post(route("checkout.process"), form, {
         onSuccess: () => {
-            alert("Pesanan berhasil dibuat!");
+            // Tampilkan notifikasi sukses pakai PrimeVue Toast
+            toast.add({
+                severity: 'success',
+                summary: 'Berhasil',
+                detail: 'Pesanan berhasil dibuat!',
+                life: 3000  // durasi tampilan toast (ms)
+            });
         },
-        onError: () => {
-            alert("Terjadi kesalahan. Silakan coba lagi.");
+        onError: (errors) => {
+            // Jika ada error dari server (misal stok tidak cukup)
+            if (errors.cart) {
+                toast.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: errors.cart,
+                    life: 3000
+                });
+            }
+            if (errors.stock) {
+                toast.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: errors.stock,
+                    life: 3000
+                });
+            }
+            // Jika ada error lain, tangani sesuai kebutuhan
+            // ...
         },
     });
 };
+
+
 </script>
 
 <style scoped>

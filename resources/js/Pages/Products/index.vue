@@ -64,13 +64,16 @@
 </template>
 
 <script setup>
-import { reactive, watch } from "vue";
+import { reactive, watch, ref } from "vue";
 import { router } from "@inertiajs/vue3";
 import Pagination from "@/Components/Pagination.vue";
 import AppLayout from "@/Layouts/AppLayout.vue";
 import { useToast } from "primevue/usetoast";
+import { route } from "ziggy-js";
 
 
+
+const isLoading = ref(false);
 const toast = useToast();
 
 // Ambil props langsung dari defineProps
@@ -106,11 +109,12 @@ const goToDetail = (id) => {
 
 // Tambah Produk ke Keranjang
 const addToCart = (productId) => {
+    isLoading.value = true; // Set loading state
     router.post(
-        "/cart",
+        route("cart.store"),
         {
             product_id: productId,
-            quantity: 1, // Default jumlah
+            quantity: 1,
         },
         {
             onSuccess: () => {
@@ -118,20 +122,25 @@ const addToCart = (productId) => {
                     severity: "success",
                     summary: "Berhasil",
                     detail: "Produk berhasil ditambahkan ke keranjang.",
-                    life: 3000, // Durasi notifikasi dalam milidetik
-                });
-            },
-            onError: () => {
-                toast.add({
-                    severity: "error",
-                    summary: "Gagal",
-                    detail: "Terjadi kesalahan saat menambah produk ke keranjang.",
                     life: 3000,
                 });
+                isLoading.value = false; // Reset loading state
+            },
+            onError: (errors) => {
+                if (errors.response.status === 302) {
+                    toast.add({
+                        severity: "error",
+                        summary: "Redirect",
+                        detail: "Terjadi kesalahan autentikasi.",
+                        life: 3000,
+                    });
+                }
+                isLoading.value = false; // Reset loading state
             },
         }
     );
 };
+
 </script>
 
 <style scoped>
