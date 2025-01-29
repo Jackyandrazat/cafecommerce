@@ -55,6 +55,9 @@
                 </table>
                 <div class="text-right mt-4">
                     <p class="text-lg font-bold">
+                        Promo: {{ formatCurrency(promo) }}
+                    </p>
+                    <p class="text-lg font-bold">
                         Total: {{ formatCurrency(total) }}
                     </p>
                 </div>
@@ -81,9 +84,10 @@ import { route } from "ziggy-js";
 const props = defineProps({
     cart: Array,
     total: Number,
+    promo: String,
 });
 
-console.log(props.cart);
+console.log(props.promo, 'promo');
 
 
 // State untuk form checkout
@@ -130,6 +134,14 @@ const processCheckout = () => {
                     severity: 'error',
                     summary: 'Error',
                     detail: errors.stock,
+                    life: 3000
+                });
+            }
+            if (errors.promo) {
+                toast.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: errors.promo,
                     life: 3000
                 });
             }

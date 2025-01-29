@@ -32,11 +32,36 @@ class CheckoutController extends Controller
 
         // Hitung total harga berdasarkan data keranjang
         $total = $cartItems->sum(fn ($item) => $item->quantity * $item->price);
+        $promoId = session('applied_promo', null);
+        $promo   = null;
+        if ($promoId) {
+            $promo = Promo::find($promoId);
+
+            // Double check: is_active, is_expired
+            if (!$promo || !$promo->is_active || $promo->is_expired) {
+                session()->forget('applied_promo');
+                throw ValidationException::withMessages([
+                    'promo' => 'Promo sudah tidak berlaku.',
+                ]);
+            }
+
+            // Jika OK, terapkan diskon
+            if ($promo->type === 'percentage') {
+                $discount = $total * ($promo->value / 100);
+            } else { // 'nominal'
+                $discount = $promo->value;
+            }
+
+            // Pastikan diskon tidak melebihi total
+            $discount = min($discount, $total);
+
+            $total -= $discount;
+        }
 
         return Inertia::render('Checkout/index', [
             'cart' => $cartItems,
             'total' => $total,
-            'promo' => session('promo', null), // Promo yang diterapkan
+            'promo' => $promo->value, // Promo yang diterapkan
         ]);
     }
 
@@ -47,20 +72,45 @@ class CheckoutController extends Controller
     public function applyPromo(Request $request)
     {
         $request->validate([
-            'promo_code' => 'required|string',
+            'code' => 'required|string',
         ]);
 
-        $promo = Promo::where('code', $request->promo_code)->first();
+        $code = $request->input('code');
+        $promo = Promo::where('code', $code)->first();
 
-        if (!$promo || !$promo->is_active || now()->greaterThan($promo->expires_at)) {
-            return back()->with('error', 'Kode promo tidak valid atau sudah kedaluwarsa.');
+        // 1) Promo ada?
+        if (!$promo) {
+            // return back()->withErrors(['promo' => 'Kode promo tidak ditemukan.']);
+            throw ValidationException::withMessages([
+                'promo' => 'Kode promo tidak ditemukan.',
+            ]);
         }
 
-        // Simpan promo ke dalam session
-        session(['promo' => $promo]);
+        // 2) Cek is_active
+        if (!$promo->is_active) {
+            // return back()->withErrors(['promo' => 'Promo ini tidak aktif.']);
+            throw ValidationException::withMessages([
+                'promo' => 'Promo ini tidak aktif.',
+            ]);
+        }
 
-        return back()->with('success', 'Kode promo berhasil diterapkan!');
+        // 3) Cek kadaluarsa atau belum mulai
+        if ($promo->is_expired || !$promo->is_started) {
+            throw ValidationException::withMessages([
+                'promo' => 'Promo sudah kadaluarsa atau belum dimulai.',
+            ]);
+            // return back()->withErrors(['promo' => 'Promo sudah kadaluarsa atau belum dimulai.']);
+        }
+
+        // 4) (Opsional) Cek apakah user sudah pernah pakai, dsb.
+        //    - Biasanya kita simpan data di promo_user (pivot) atau di orders.
+
+        // Lolos semua, taruh di session agar bisa diaplikasikan saat checkout
+        session()->put('applied_promo', $promo->id);
+
+        return back()->with('success', 'Promo berhasil diterapkan!');
     }
+
 
     /**
      * Memproses checkout.
@@ -105,13 +155,43 @@ class CheckoutController extends Controller
         }
 
         // Ambil promo jika ada
-        $promo = session('promo', null);
-        if ($promo) {
-            $total -= $promo->discount_amount;
+        $promoId = session('applied_promo', null);
+        $promo   = null;
+        if ($promoId) {
+            $promo = Promo::find($promoId);
+
+            // Double check: is_active, is_expired
+            if (!$promo || !$promo->is_active || $promo->is_expired) {
+                session()->forget('applied_promo');
+                throw ValidationException::withMessages([
+                    'promo' => 'Promo sudah tidak berlaku.',
+                ]);
+            }
+
+            // Jika OK, terapkan diskon
+            if ($promo->type === 'percentage') {
+                $discount = $total * ($promo->value / 100);
+            } else { // 'nominal'
+                $discount = $promo->value;
+            }
+
+            // Pastikan diskon tidak melebihi total
+            $discount = min($discount, $total);
+
+            $total -= $discount;
         }
 
         // Pastikan user terautentikasi sebelum membuat pesanan
         $customerName = Auth::check() ? Auth::user()->name : 'Guest';
+        $isUsed = Order::where('customer_name', $customerName)
+        ->where('promo_id', $promo->id)
+        ->exists();
+
+        if ($isUsed) {
+            throw ValidationException::withMessages([
+                'promo' => 'Anda sudah pernah menggunakan promo ini.',
+            ]);
+        }
 
         // Simpan order ke database
         $order = Order::create([
@@ -124,9 +204,11 @@ class CheckoutController extends Controller
                 ];
             })->toJson(),
             'total_price'    => $total,
+            'promo_id' => $promo->id,
             'payment_method' => $request->payment_method,
             'status'         => 'pending',
         ]);
+
 
         // Update stok produk di database setelah pemesanan berhasil
         foreach ($products as $product) {
@@ -136,6 +218,8 @@ class CheckoutController extends Controller
                 $product->save();
             }
         }
+
+        session()->forget('applied_promo');
 
         // Hapus item keranjang setelah pesanan dibuat
         CartItem::where('user_id', Auth::id())

@@ -17,6 +17,7 @@ class Order extends Model
         'status',
         'products',
         'payment_method',
+        'promo_id',
     ];
 
     protected $casts = [
@@ -26,6 +27,11 @@ class Order extends Model
     public function products(): BelongsToMany
     {
         return $this->belongsToMany(Product::class, 'order_product');
+    }
+    public function promo()
+    {
+        // belongsTo karena kolom foreign key ada di orders (promo_id)
+        return $this->belongsTo(Promo::class, 'promo_id', 'id');
     }
 
     /**

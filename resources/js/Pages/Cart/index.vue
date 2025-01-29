@@ -18,21 +18,13 @@
                     <tr v-for="item in cartItems" :key="item.id">
                         <td>{{ item.product.name }} - Stok: {{ item.product.stock }}</td>
                         <td>
-                            <input
-                                v-model.number="item.quantity"
-                                @change="updateQuantity(item)"
-                                type="number"
-                                min="1"
-                                class="border p-2 w-16 text-center"
-                            />
+                            <input v-model.number="item.quantity" @change="updateQuantity(item)" type="number" min="1"
+                                class="border p-2 w-16 text-center" />
                         </td>
                         <td>{{ formatCurrency(item.price) }}</td>
                         <td>{{ formatCurrency(item.price * item.quantity) }}</td>
                         <td>
-                            <button
-                                @click="removeItem(item.id)"
-                                class="text-red-500 hover:underline"
-                            >
+                            <button @click="removeItem(item.id)" class="text-red-500 hover:underline">
                                 Hapus
                             </button>
                         </td>
@@ -42,6 +34,7 @@
 
             <!-- Total Harga -->
             <div class="mt-4 text-right">
+                <InputText v-model="promoCode" @change="applyPromo" placeholder="Masukkan Kode Promo" />
                 <p class="text-lg font-bold">
                     Total: {{ formatCurrency(total) }}
                 </p>
@@ -49,10 +42,7 @@
 
             <!-- Tombol Checkout -->
             <div class="mt-4 text-right">
-                <button
-                    @click="goToCheckout"
-                    class="bg-green-500 text-white py-2 px-4 rounded-md"
-                >
+                <button @click="goToCheckout" class="bg-green-500 text-white py-2 px-4 rounded-md">
                     Lanjutkan ke Checkout
                 </button>
             </div>
@@ -65,16 +55,18 @@
 </template>
 
 <script setup>
-import { defineProps } from "vue";
+import { defineProps, ref } from "vue";
 import { router } from "@inertiajs/vue3";
 import { route } from "ziggy-js";
 import { useToast } from 'primevue/usetoast'; // 1) import PrimeVue Toast
+import InputText from 'primevue/inputtext';
 
 const props = defineProps({
     cartItems: Array,
     total: Number,
 });
 
+const promoCode = ref('');
 // Inisialisasi Toast
 const toast = useToast();
 
@@ -96,6 +88,32 @@ const updateQuantity = (item) => {
 // Fungsi Hapus Item
 const removeItem = (id) => {
     router.delete(route("cart.destroy", id));
+};
+
+const applyPromo = () => {
+    router.post(route('checkout.apply-promo'), { code: promoCode.value }, {
+        onError: (errors) => {
+            if (errors.promo) {
+                toast.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: errors.promo,
+                    life: 3000
+                });
+            }
+        },
+        onSuccess: (page) => {
+            // Jika ada flash success
+            if (page.props.flash.success) {
+                toast.add({
+                    severity: 'success',
+                    summary: 'Sukses',
+                    detail: page.props.flash.success,
+                    life: 3000
+                });
+            }
+        },
+    });
 };
 
 // Fungsi Navigasi ke Halaman Checkout dengan Validasi Stok
